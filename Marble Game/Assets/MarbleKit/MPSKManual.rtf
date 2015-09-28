@@ -1,0 +1,708 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf200
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;\red68\green68\blue68;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\b\fs36 \cf0 Notes on Code Organization\
+
+\b0\fs24 One of the first things you'll probably notice is that some of the class names are prefixed with IP, while others are prefixed with MK. IP stands for Imperial Penguin, whereas MK stands for Marble Kit. The general theory regarding the names of the classes is that classes prefixed with IP are more easily reusable for other types of games than are classes prefixed with MK. During development, the line between these two began to blur a bit and the naming was more of a judgement call than a hard and fast rule. \
+\
+You'll also notice that some of the classes, especially those prefixed with IP, are setup in some places to handle more than one player. That functionality is not supported in the Marble Platformer Starter Kit at this time, but was done in the interest of making the classes more easily reusable for other projects.\
+\
+\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs36 \cf0 Notes on Mobile\
+
+\b0\fs24 There are a couple of points to be made about using Marble Platformer Starter Kit on mobile devices. The first is about the control system. Virtual joysticks and accelerometer controls provide less precise input than actual joysticks or keyboard/mouse input. Further, there is also a big difference in control between the virtual joysticks and the accelerometer. So if you are targeting mobile, you should choose a control style and test your level design using that. \
+\
+The second point to make is that shadows on mobile seem to prefer a different bias setting on the lights than desktop does. While the default bias of 0.05 looks fine on desktop platforms, I've found that a bias of around 0.5 looks better on mobile devices. The default bias causes unwanted artifacts on the shadows.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs36 \cf0 Quick Start\
+
+\b0\fs24 This section will guide you through the basics of getting  skeleton project started that you can later flesh out into your final game. We'll go step by step.\
+\
+
+\b\fs28 import the Package\
+
+\b0\fs24 This step is probably pretty obvious, but the first thing you'll need to do is to import the package into Unity. if you purchased the package directly from the Imperial Penguin website then you'll want to go to the Assets menu, then Import Package, then click on Custom Package. Next you'll find the unity package file that you downloaded and open it. \
+\
+If you purchased the asset from the Unity asset store, then you'll open the asset store, navigate the the Marble Platformer Starter Kit and import it from there. \
+\
+
+\b\fs28 Move ImputManager\
+
+\b0\fs24 There's a text file in the main asset folder named IMPORTANT! If you've already read that and followed the instructions then you can skip this section. Otherwise, you'll have no doubt noticed the error about a global game manager in the Unity console when you imported the asset.\
+\
+That error is because we've included a custom InputManager and Unity does not like that to be in the assets folder. Let's take care of that now.\
+\
+Open your operating system's file manager (Finder on Mac) and navigate to the directory where you created your project. You should see an Assets folder and a ProjectSettings folder (among others). \
+\
+Open the assets folder and move (not copy) the InputManager.asset file from that folder to the ProjectSettings folder. You will be warned that you are going to overwrite an existing file. Make sure to tell your OS to overwrite the file. We want the InputManager that came with the package in there, not the one that Unity automatically created. \
+\
+
+\b\fs28 Making the First Level\
+
+\b0\fs24 Now it is time to make our first level! Back in Unity, navigate to the Scenes folder and click on the scene named 'Starter'. From the Unity menu bar choose Edit->Duplicate to duplicate that scene. Rename the duplicate to 'Level1' and open it.\
+\
+You will see a very simple level that consists of one square of grass, a checkpoint for the player to start at, and a finish line. Create your level from this starter scene. You can scale the grass to any size and its texture will automatically tile correctly (this will not be visible until you play the scene). \
+\
+You'll eventually need more objects for your scene. So play around with the various objects in the Prefabs subfolder in the asset browser. Each of the prefabs is described in detail later in the manual. Of course, you aren't limited to that one square of grass. The grass prefab will let you make up your level using a variety of grass sizes just like the demo levels do. \
+\
+
+\b\fs28 Adding Checkpoints\
+
+\b0\fs24 One thing to note before we move on to the next step is that whenever you add a checkpoint to the scene, you'll also need to add a reference to it in the Scene Manager. To do that, just click on the SceneManager in the hierarchy view to bring up its inspector. Checkpoints are stored in the 
+\f1 Spawn Points 
+\f0 array.\
+\
+As you can tell from the demo levels, I like to name my checkpoints in order: Checkpoint1, Checkpoint2, Checkpoint3, etc. and add them as children of the SceneManager to keep the hierarchy view nice and tidy. The default checkpoint for the starter scene is already a child of the SceneManager. Whether your choose to use this convention or not is up to you. It will have no ill effects on the game if the checkpoints are not children of the SceneManager.\
+
+\b\fs36 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs28 \cf0 Adding the Ground / Floor\
+
+\b0\fs24 There are two ways you can tell if your player has died. The simplest is to leave the scene as is, with no ground at the bottom, and edit the SceneManager variable named 
+\f1 Floor
+\f0 , which you can find in the inspector for the SceneManager to something closer to the player. The floor is the Y value that the player will die at if he reaches. Since the grass in the starter scene is at a Y value of positive 10, a floor of 0 may be reasonable. Of course, you can tweak that value to your needs.\
+\
+The other way to determine the player's death is to add a ground plane. In the demo levels, I used a terrain object. You can use whatever you wish. But whatever mesh object you use, you should attach the MKGround script to it as a component and make sure it has a collider so it can send the Kill command to the player if they touch it.\
+\
+
+\b\fs28 Creating More Levels\
+
+\b0\fs24 You create additional levels the same way that you created the first one. Simply duplicate the Starter Scene again and edit it to create the scene you want, using any of the prefabs available. You can name the levels anything you want, but for the sake of this tutorial, I'll assume that you named them Level2, Level3, Level4, etc. When it comes time to add them to the game manager in a few steps, they'll need to be added in order so the numbering helps with that.\
+\
+
+\b\fs28 Creating the Main Menu\
+
+\b0\fs24 If you played the demo, then you know that the main menu consists of a camera rotating around one of your levels. To create this menu choose the level that you want to feature in it. Duplicate that level scene and rename the duplicate to 'MainMenu'. \
+\
+Open the newly created MainMenu scene and delete the PlayerRig from the hierarchy. It is not needed for the main menu. Instead, drag the MainMenuRig prefab into the scene in its place. Later in the manual, we'll discuss how you can tweak the main menu prefab to suit your desires.\
+\
+Next, drag the GameManger prefab into the scene. After we set that up, the main menu scene will be complete!\
+\
+
+\b\fs28 Game Manager Setup
+\b0\fs24 \
+To setup the game manager, you need to tell it which levels to use. Since we named our main menu scene 'MainMenu' type that into the value for Main Menu in the inspector of the game manager prefab that you added to your hierarchy.\
+\
+To add the levels, enter the number of levels you have in the size variable of the levels array in the gamemanager's inspector. You will then be able to assign string values for each of the levels. Enter the names of the level scenes into those values. For our example above, we would enter 'Level1', 'Level2', 'Level3', and 'Level4'.\
+\
+Then you just have to enter the staring lives that you would like your player to have and you are ready to play! \
+\
+
+\b\fs28 Build Settings\
+
+\b0\fs24 With your main menu scene open and your game manager setup, all you have to do now is add the scenes to your build settings. From the Unity menu go to File->Build Settings. Clear out any scenes that are already there and then drag and drop your scenes into the build settings. Make sure the Main Menu scene is at the top. \
+\
+You are now ready to press Play from your Main Menu and make your way through your levels!\
+\
+
+\b\fs36 Using the Prefabs\
+
+\b0\fs24 This section will tell you how to use the various prefabs that come with the Marble Platformer Starter Kit.  All prefabs that rely on directional information consider the positive Z axis to be forward. So pointing them in the direction of the blue arrow will give you the results you want.\
+\
+
+\b\fs28 Cannon\
+
+\b0\fs24 The main control script for the Cannon prefab isn't located at the root of the prefab, but rather in the child object also named Cannon. It has the following public variables:\
+\
+
+\f1 Activated - 
+\f0 This comes from the fact that the Cannon is an IPSwitchableObject. If it will not be controlled by a switch, then leave this on.\
+\
+
+\f1 Cannonball - 
+\f0 This is a reference to the cannonball prefab that it will instantiate and fire. You shouldn't need to change this value.\
+\
+
+\f1 Smoke Holder - 
+\f0 This is an empty game object that tells the script where to place the smoke that it instantiates upon firing the cannon. Again, you shouldn't need to change this.\
+\
+
+\f1 Smoke - 
+\f0 This is a reference to the smoke particle system that is instantiated when the cannon is fired. It is setup for you automatically.\
+\
+
+\f1 Fire Delay - 
+\f0 This tells the script how long to wait before the initial firing of the cannon. Having different values for different cannons will allow you to stagger their firing order.\
+\
+
+\f1 Fire Interval - 
+\f0 This is the amount of time to wait in between firings of the cannon.\
+\
+
+\f1 Force - 
+\f0 The force to apply to the cannonball when firing it.
+\b\fs36 \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs28 \cf0 Catapult\
+
+\b0\fs24 The main control script for the Catapult prefab is located in the child object also named Top. The catapult doesn't use realistic catapult physics to launch the player, but rather lets you set the upward and forward forces individually so you can have more control over where the player lands. It has the following public variables:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1 \cf0 Activated - 
+\f0 This comes from the fact that the object is an IPSwitchableObject. If it will not be controlled by a switch, then leave this on.\
+\
+
+\f1 Up Force - 
+\f0 This is the amount of upward force to apply to the player when they trigger the catapult.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs36 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1\b0\fs24 \cf0 Forward Force - 
+\f0 The amount of forward force to apply when the player triggers the catapult.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs36 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs28 \cf0 Checkpoint\
+
+\b0\fs24 The checkpoint prefab only has two variables associated with it to provide references to the particle systems that are activated when it is passed. You shouldn't need to edit those unless you want to change the particle systems.\
+\
+When the player dies after passing a checkpoint, they will be placed back at the checkpoint, facing the same direction as the checkpoint. Remember, the blue arrow (positive Z) indicated which direction the checkpoint is facing. 
+\b\fs36 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs28 \cf0 Collapser\
+
+\b0\fs24 The collapser begins rocking for a little bit as the player touches it and then falls to the ground, taking the player with it if they are not fast enough. The public variables it uses are:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1 \cf0 Activated - 
+\f0 This comes from the fact that the Collapser is an IPSwitchableObject. If it will not be controlled by a switch, then leave this on.\
+\
+
+\f1 Fall Delay - 
+\f0 This is the time, in seconds, before the collapser begins falling to the ground after being touched by the player.\
+\
+
+\f1 Rock Angle - 
+\f0 This is the angle that the collapser will rotate to when it is touched by the player. It will bounce back and forth between -
+\f1 Rock Angle 
+\f0 and +
+\f1 Rock Angle.\
+\
+Rock Time - 
+\f0 This is the time, in seconds, that each rock motion takes to complete\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs28 \cf0 Fan\
+
+\b0\fs24 The fan prefab has two scripts attached to it. One controls the force that is added to the player, and the other controls the action of the fan itself. They have the following public variables:\
+\
+
+\i\b IPFan
+\b0 \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1\i0 \cf0 Activated - 
+\f0 This comes from the fact that the Fan is an IPSwitchableObject. If it will not be controlled by a switch, then leave this on.\
+\
+
+\f1 Blades - 
+\f0 This is a reference to the fan blades mesh. You most likely will not need to change this.\
+\
+
+\f1 Force Trigger - 
+\f0 This is a reference to the IPForceTrigger script. Again, this is a variable that you most likely won't need to change.\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\i\b \cf0 IPForceTrigger
+\i0\b0 \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1 \cf0 Force Type - 
+\f0 This controls what direction the force is relative to. It is a generic variable to add flexibility to the IPForceTrigger class and won't need to be changed for the fan.\
+\
+
+\f1 Force Direction - 
+\f0 This controls the direction of the force. Again, this is a generic variable and should always be set to forward for the fan.\
+\
+
+\f1 Force - 
+\f0 This is the amount of force to apply to the player when they are in the path of the fan.\
+\
+
+\f1 Force Falloff - 
+\f0 This determines how much of the force is lost at the end of the trigger. With a value of 1.0, all of the force will be lost. So the player will be hit with the full force of the fan when they are right next to the blades, and no force if they are at the edge of the collider on the other side. 
+\b\fs36 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs28 \cf0 Finish Line\
+
+\b0\fs24 There are no public settings for controlling the finish line. When the player crosses the trigger, the ending animation will play and a menu will pop up allowing them to continue on to the next level or return to the main menu.\
+\
+
+\b\fs28 Game Manager\
+
+\b0\fs24 The game manager prefab should be added to the entire game only once. Preferably in any splash screen you may have setup, or in the main menu. It controls the changes between levels when a player completes one, or dumps them back to the main menu on game over. The public variables it users are:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1 \cf0 Starting Lives - 
+\f0 This is the number of lives that the player has when the game first starts. The number will decrease as they fall off the world.\
+\
+
+\f1 Main Menu - 
+\f0 This string value is the name of the main menu scene. It is passed directly into 
+\f1 LoadLevel() 
+\f0 so use the same value that you would for that.\
+\
+
+\f1 Levels - 
+\f0 This is an array of strings which represents the scenes that make up all of the levels in the game. Like 
+\f1 Main Menu
+\f0  the names should be set so that they can be passed directly into 
+\f1 LoadLevel().
+\f0  The levels should be in the order that they will be progressed through in the game.
+\b\fs36 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs28 \cf0 Grass\
+
+\b0\fs24 The grass prefab can be used to make the ground that the player rolls on if you do not wish to create your levels in an external editor. It can be scaled to any size and the texture will automatically adjust its scaling to match. The texture scaling is controlled by the IPAutoTile script attached to the child object named Body.\
+\
+
+\b\fs28 Landmine\
+
+\b0\fs24 The landmine will explode if the player runs into it. The public variables that you can use to control it are:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1 \cf0 Explosion - 
+\f0 This points to the particle system to use for the explosion. The particle system is part of the prefab and you most likely won't want to change this.\
+\
+
+\f1 Clean and Burnt Materials - 
+\f0 These two variables are references to the materials that represent the object in its clean (non-exploded) and burnt (post-explosion) states. Again, you probably won't want to change these.\
+\
+
+\f1 Force - 
+\f0 This is the force of the explosion.\
+\
+
+\f1 Upward Force - 
+\f0 This controls how much extra upward force is exerted on the player when the landmine explodes.\
+\
+
+\f1 Radius - 
+\f0 This is the radius of the sphere collider used to determine what is affected by the explosion. It will not change the radius of the particle system. Be careful adjusting this since it should line up pretty closely with the size of the particle explosion.\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs28 \cf0 MainMenuRig\
+
+\b0\fs24 The main menu rig is used for controlling the camera and GUI of the main menu. The main menu is best created by duplicating one of your level scenes, deleting the player rig, and replacing it with the main menu rig. This way the player sees the camera orbiting around a game scene. Of course, you could create a scene especially for the main menu if you so choose. The public variables associated with the main menu rig are:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1 \cf0 Skin - 
+\f0 The GUI skin to use for the menu\
+\
+
+\f1 Center - 
+\f0 The point around which the camera will orbit. This will usually look best if it is the center point of the scene you are rotating around.\
+\
+
+\f1 Distance - 
+\f0 This is how far from the center you want the camera to be positioned.\
+\
+
+\f1 Height - 
+\f0 This is how high above the center point you want the camera located. The camera will always look at the center point, so this variable also indirectly controls the angle that the camera is pointing in the vertical direction.\
+\
+
+\f1 Speed - 
+\f0 This is the speed that the camera orbits around the center point at.\
+  \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs28 \cf0 Moving Platform\
+
+\b0\fs24 This prefab creates a platform that moves between a set of waypoints. The waypoints themselves are just empty game objects positioned at the locations that you want the platform to move to. The script is attached to the child object named Platform. This is so you can add the waypoints as children of the root moving platform object to keep your hierarchy organized. Making the waypoints children of the actual platform would cause them to move with it and break the functionality.  The public variables are:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1 \cf0 Activated - 
+\f0 This comes from the fact that the moving platform is an IPSwitchableObject. If it will not be controlled by a switch, then leave this on.\
+\
+
+\f1 Attach Player - 
+\f0 Because the player is a ball, having the platform move underneath of them usually just results in the ball rolling off. Enabling this will parent the ball to the platform to make it easier for them to stay on. Keep in mind that the platform must have a scale of 1 to avoid having the player take on a strange scale when parented.\
+\
+
+\f1 Pause at all Stops - 
+\f0 If this is set to true, the platform will pause at all of the waypoints. If set to false, it will only pause at the first and last waypoints.\
+\
+
+\f1 One Way - 
+\f0 If set to true, the platform will not return once it has reached its destination. If false, it will continue to move back and forth through the waypoints.\
+\
+
+\f1 Stops - 
+\f0 This is an array containing the empty game objects that represent the waypoints. They should be listed in the order that you want the moving platform to follow thing.\
+\
+
+\f1 Stop Delay - 
+\f0 This is the time, in seconds, that the moving platform pauses for when reaching a new waypoint.\
+\
+
+\f1 Speed - 
+\f0 This is the speed that the platform moves at.
+\b\fs36 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs28 \cf0 Player Rig\
+
+\b0\fs24 There are two children in the player rig that can be adjusted. The Player, and the Camera. The section below will explain the public variables that are available in those two objects.\
+\
+
+\i\b Player\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1\i0\b0 \cf0 Player Camera - 
+\f0 This is a reference to the camera that is also in the Player Rig prefab. You shouldn't need to change this.
+\f1 \
+\
+Control Force - 
+\f0 This is the amount of force that is added when the player pressed the control keys.
+\f1 \
+\
+Jump Force - 
+\f0 This is the amount of upward force that is added when the player presses the jump button. Set this to 0 if you do not want to allow the player to jump.
+\f1 \
+\
+Use Accelerometer - 
+\f0 This boolean determines whether or not controls on mobile platforms should use the accelerometer. The accelerometer controls quite a bit differently, so game levels should be designed with the control mechanic in mind.
+\f1 \
+\
+Accel Sensitivity H - 
+\f0 This is the sensitivity of the accelerometer in the horizontal direction.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs36 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1\b0\fs24 \cf0 Accel Sensitivity V - 
+\f0 This is the sensitivity of the accelerometer in the vertical direction. 
+\f1 \
+\
+Aceel Dead Zone - 
+\f0 This is the amount of dead space in the center of the accelerometer data before it starts registering input.
+\f1 \
+\
+Left Stick - 
+\f0 This is a reference to the prefab for the left virtual joystick on mobile platforms. Since this is already in the Player Rig prefab, you shouldn't need to change it.\
+
+\f1 \
+Right Stick - 
+\f0 This is a reference to the prefab for the right virtual joystick on mobile platforms. Since this is already in the Player Rig prefab, you shouldn't need to change it.
+\f1 \
+\
+Touch Joy Sensitivity - 
+\f0 This is the sensitivity of the left virtual joystick. The right joystick is only used by the player for jumping when it is double tapped, so its sensitivity is set in the camera object.
+\f1 \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\i\b \cf0 Camera\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1\i0\b0 \cf0 Player -
+\f0  This is a reference to the player object. It  is preset for you and you shouldn't have to change it.
+\f1 \
+\
+Joystick Sensitivity - 
+\f0 This is the sensitivity of the physical joystick for desktop platforms. The right stick will control the motion of the camera. This variable sets its sensitivity.
+\f1 \
+\
+Mouse Sensitivity - 
+\f0 The mouse can rotate the camera around in desktop versions of the game. This sets the sensitivity that it uses when doing that.\
+
+\f1 \
+Distance - 
+\f0 This is the distance that the camera maintains from the player.
+\f1 \
+\
+Vertical Angle - 
+\f0 This is the starting vertical angle that the camera keeps in relation to the player. The player can move this angle around with the mouse or the joystick, but it will revert to this value when they restart at a checkpoint.
+\f1 \
+\
+Damping - 
+\f0 This is the damping value used for the smooth look of the camera.
+\f1 \
+\
+Right Stick - 
+\f0 This is a reference to the right virtual joystick for mobile platforms. It is built in to the Player Rig prefab so you shouldn't have to change it.
+\f1 \
+\
+Touch Joy Sensitivity - 
+\f0 This is the sensitivity of the virtual joystick on mobile platforms. On mobile platforms, the right virtual joystick moves the camera around.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs36 \cf0 \
+
+\fs28 Rammer\
+
+\b0\fs24 The rammer uses the exact same script as the moving platform, so look at the instructions for that prefab to see what the public variables do. The difference between the two prefabs, of course, is that the rammer is designed to hit the player and knock them off the platform rather than to carry them to another location. For that reason, you will almost always want the 
+\f1 Attach Player 
+\f0 variable to be set to false for this prefab. The script is attached to the child object named Obstruction. Just like the moving platform prefab, the root object in this prefab can be used to hold the waypoints as children.\
+
+\b\fs36 \
+
+\fs28 Rotating Platform\
+
+\b0\fs24 This prefab creates a platform that rotates around. Its public variables are:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1 \cf0 Activated - 
+\f0 This comes from the fact that the rotating platform is an IPSwitchableObject. If it will not be controlled by a switch, then leave this on.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs36 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1\b0\fs24 \cf0 Attach Player - 
+\f0 Because the player is a ball, having the platform move underneath of them usually just results in the ball rolling off. Enabling this will parent the ball to the platform to make it easier for them to stay on. Keep in mind that the platform must have a scale of 1 to avoid having the player take on a strange scale when parented.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs36 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1\b0\fs24 \cf0 Direction - 
+\f0 This determines whether the rotation of the platform is clockwise or counter-clockwise.\
+\
+
+\f1 Rotation Axis - 
+\f0 This variable of the IPRotator script is there to allow the script to be used for more general purposes. It should almost always be set to the Y axis when used on a rotating platform.\
+\
+
+\f1 Step Degrees - 
+\f0 The rotating platform will pause after a certain number of degrees to allow the player time to get on. This is the number of degrees before those pauses. This number must go evenly into 360 degrees.\
+\
+
+\f1 Step Delay - 
+\f0 This is the time, in seconds, to pause at each step.
+\f1 \
+\
+Speed - 
+\f0 This is the speed that the platform rotates at.\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs28 \cf0 SceneManager\
+
+\b0\fs24 There should be one scene manager prefab in every level of your game. It is where you setup the locations of the checkpoints and their behavior. The public variables are below:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1 \cf0 Skin - 
+\f0 This is the GUI skin to use for the scene. One is provided for you and automatically hooked into the prefab, but you can certainly edit that one or provide an entirely new one if you'd like.
+\f1 \
+\
+Player - 
+\f0 This is a reference to the player game object. If you are not using the starter scene, you'll have to drag the Player child of the Player Rig prefab from your hierarchy view to this slot.
+\f1 \
+\
+Floor - 
+\f0 This is used if you are not using geometry for your ground. It is the Y coordinate that your player will die at if they fall below it. By default, the assumption is that you will add a mesh or the ground (the demo scenes use a terrain) so this is set to -1000 so it doesn't interfere with anything. If you are using a ground mesh, be sure to add the MKGround script to that mesh. If you are not, you'll want to set this value much, much closer to the player than -1000.
+\f1 \
+\
+Spawn Method - 
+\f0 This determines how the player will be respawned after death. SpawnFurthest will respawn them at the furthest checkpoint that they have reached. SpawnRecent will respawn them at the most recent checkpoint that they passed (in case they have moved backwards in the level) and RandomSpawn will spawn them at a random checkpoint.
+\f1 \
+\
+Spawn Points - 
+\f0 This is an array containing all of your checkpoints for the scene. Every checkpoint that you add to the scene must be added to this array. If SpawnFurthest is the spawn method, then the array also must be in the order that you want them to be crossed.
+\f1 \
+\
+Death Pause - 
+\f0 This is the amount of time, in seconds, to wait after the player falls to their death before restarting them at the last checkpoint.
+\f1 \
+\
+Fall Text - 
+\f0 This is the text to display when the player falls to their death and they have lives remaining.\
+
+\f1 \
+Game Over Text - 
+\f0 This is the text to display when the player falls to their death and they are out of lives.
+\f1 \
+\
+Level Cleared Text - 
+\f0 This is the text to display when a player crosses the finish line.\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs28 \cf0 Slow Down Pad / Speed Up Pad\
+
+\b0\fs24 These two prefabs have the same settings and either decrease the player's velocity when they make contact, or increase it. It is important to note that the control script is exactly the same. The 
+\f1 Velocity Factor
+\f0  variable determines whether the effect is to speed the player up, or slow them down. The public variables are:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1 \cf0 Force Type - 
+\f0 This determines whether the velocity is changed relative to the target or relative to the pad. If it is relative to target, it will change the velocity in the direction that the player is traveling. If relative to pad, it will change the velocity in the direction that the pad is facing. 
+\f1 \
+\
+Velocity Factor - 
+\f0 This tells the script what to multiply the velocity by. In order to speed up the player, make this number greater than one. To slow down the player make it a number between 0 and 1.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs36 \cf0 \
+
+\fs28 Switch\
+
+\b0\fs24 The switch prefab's control script is not on the root object of the prefab. Instead, it is on the child object that is also named switch. The first three variables are specific to the model used. The public variables are:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1 \cf0 Up Position -
+\f0  This is the position of the switch object, relative to the parent, when it is in the up position. It is specific to the model used so you will likely not have to change it unless you create your own model.
+\f1 \
+\
+Down Position - 
+\f0 This is the position of the switch object when it is completely depressed. Like the up position, it is relative to the parent and specific to the model.
+\f1 \
+\
+Move Time - 
+\f0 When the player enters the switch, it will begin moving down. It will move up when they exit. This is the time that it takes to complete that motion. If this number is too low (the switch moves too fast), then the switch may not behave as expected at very low frame rates. It shouldn't fall faster than gravity will push the player down.
+\f1 \
+\
+Target - 
+\f0 This is a reference to the scriptable object that the switch controls. Simply drag and drop the object that you want to control into this slot.
+\f1 \
+\
+Action - 
+\f0 All switchable objects can respond to Turn On, Turn Off, Toggle and Momentary. This determines which of those will occur when the switch is depressed. If set to Momentary, the switch will toggle when it is depressed and then toggle again when it is released.
+\f1 \
+\
+Target Camera - 
+\f0 This is an optional parameter. If you create a camera and point it toward the switchable object, you can place it in this slot and the scene will cut to that option to show the player what happened when the switch was activated. If no camera is used, then nothing will happen.
+\f1 \
+\
+Cutscene Time - 
+\f0 If a target camera is used, this is the time, in seconds, that the target camera will show before returning control to the player.
+\b\fs36 \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs28 \cf0 Teleporter\
+
+\b0\fs24 The teleporter will transport a player from one teleporter to another. For that reason, there must be at least two of them in the scene. Any given teleporter can have more than one target, which can be set in code or randomized. The public variables are:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1 \cf0 Activated - 
+\f0 This comes from the fact that the teleporter is an IPSwitchableObject. If it will not be controlled by a switch, then leave this on.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b\fs36 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f1\b0\fs24 \cf0 Offset Y - 
+\f0 This variable is specific to the model and indicates the height offset of the mesh so the player will be placed at the correct height.
+\f1 \
+\
+Idle Particles - 
+\f0 This is a reference to the particles that play when the teleporter is not teleporting a player.
+\f1 \
+\
+Action Particles - 
+\f0 A reference to the particles that play when the teleporter is in the process of teleporting a player.
+\f1 \
+\
+Destination - 
+\f0 This is the index into the 
+\f1 Targets 
+\f0 array indicating which of the targets the this teleporter will teleport a player to. 
+\f1 \
+\
+Random Target - 
+\f0 This boolean value determines whether or not the teleporter will randomly choose a destination from its assigned targets.
+\f1 \
+\
+Targets - 
+\f0 This is an array of Teleporter objects that will serve as the potential destinations of this teleporter. You can leave this blank if the teleporter is only going to  be acting as a receiver for another one.
+\f1 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\b \cf0 \
+\
+
+\fs36 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 Special Classes\
+
+\b0\fs24 The Marble Platformer Starter Kit has a couple of special classes that it uses to create its functionality.  You can also extend these if you would like to take advantage of their features. They are described below. \
+\
+
+\b\fs28 IPGameObject\
+
+\b0\fs24 This may grow at some point to be more generalized, hence the generalized name, but for now it can be considered a checkpoint object. Whenever a checkpoint is passed, an object of this type will save it's position, rotation, and active status. When the player dies and returns to a checkpoint, those values will be restored. \
+\
+To use it, you will need to override the Start method, as well as the SaveCheckpointState and RestoreCheckpointState methods. Each of those overridden methods should also call the base method. You can see this in action by viewing the cs file of any object that inherits directly from this class, or from the IPSwitchableObject class that also inherits from IPGameObject.\
+\
+On start, and IPGameObject will automatically add itself to the checkpoint manager. If you destroy the object before a scene ends, you should call a static method from IPCheckpointManager to remove that object from the manager's list. You can do that like so:\
+\
+\pard\pardeftab720
+
+\f1 \cf2 IPCheckpointManager.RemoveIPGameObject(objectToRemove)\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\b\fs28 \cf0 IPSwitchableObject
+\f1\b0\fs24 \cf2 \
+
+\f0 An IPSwitchableObject is a special type of IPGameObject that can be hooked to an IPSwitch object so that the switch can control the switchable object. The methods that the switch can call on the switchable object are:\
+\
+
+\f1 SwitchOn()\
+SwitchOff()\
+SwitchToggle()\
+\
+
+\f0 Those methods do exactly what they say they do. Each switchable object has a boolean variable named 
+\f1 activated 
+\f0 that indicated whether or not that switchable object is active. This is separate from Unity's SetActive or enabled features because you will probably want the object to remain visible in the scene when it is switched off. You can check for the usage of the 
+\f1 activated 
+\f0 variable in any cs file that inherits from IPSwitchableObject to see how it is used. \
+\
+
+\b\fs28 IPAutoTile and IPAutoTilePreview\
+
+\b0\fs24 These two classes aren't meant to be inherited from, but still may come in handy. They are used to automatically tile the texture in the Grass prefab to match its size. They are why you can scale the grass prefab to any size in the editor and still have it look correctly when you play the game. \
+\
+IPAutoTile is meant for use in-game. Each object will get its own set of texture coordinates that properly matches its size. IPAutoTIlePreview is meant for use in the editor, so you can see the changes that you are making in real time and make adjustments as necessary. Since the two are completely interchangeable, you can add the IPAutoTilePreview script to your object and tweak the values using the real time feedback of the editor, then change it over to the IPAutoTIle script for use in-game without losing those values.}

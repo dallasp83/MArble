@@ -1,0 +1,5 @@
+On importing the package, you will likely be faced with an error that says "You are trying to import an asset which contains a global game manager." That is because I have included a custom input manager file and Unity doesn't like for that to be in the assets folder, but it has to be there in order to include it in the package.
+
+The error is a very simple fix. Just move the file labeled InputManager at the root of the assets folder to the ProjectSettings folder of your project, making sure to overwrite the one that is there. You will need to use your OS's file manager to do this (Finder on Mac). 
+
+The ProjectSettings folder is in the main directory of your project. The same one where the Assets folder and the Monodevelop project files are. 
